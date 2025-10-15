@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tick Species & Sex Classifier</title>
+     <link rel="stylesheet" href="/static/style.css">
+    
+</head>
+<body>
+    <h1>Tick Species & Sex Classifier</h1>
+
+    <!-- Dropzone area -->
+    <div class="dropzone" id="dropzone">
+        <p id="dropText">Drag & Drop an image here or <strong>click</strong> to choose a file</p>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <img id="previewImg">
+    </div>
+
+    <!-- Predict button -->
+    <button id="predictBtn" disabled>Predict</button>
+
+    <!-- Results -->
+    <div class="result" id="result" style="display:none;"></div>
+
+     <!-- Link to external JS file -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

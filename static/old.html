@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tick Species & Sex Classifier</title>
+     <link rel="stylesheet" href="/static/style.css">
+    
+</head>
+<body>
+    <h1>Tick Species & Sex Classifier</h1>
+
+    <!-- Dropzone area -->
+    <div class="dropzone" id="dropzone">
+        <p id="dropText">Drag & Drop an image here or <strong>click</strong> to choose a file</p>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <img id="previewImg">
+    </div>
+
+    <!-- Predict button -->
+    <button id="predictBtn" disabled>Predict</button>
+
+    <!-- Results -->
+    <div class="result" id="result" style="display:none;"></div>
+
+    <script>
+        let file;
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const previewImg = document.getElementById('previewImg');
+        const dropText = document.getElementById('dropText');
+        const predictBtn = document.getElementById('predictBtn');
+        const resultDiv = document.getElementById('result');
+
+        // Click opens file picker
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        // File picker change
+        fileInput.addEventListener('change', e => {
+            file = e.target.files[0];
+            showPreview(file);
+        });
+
+        // Drag over effect
+        dropzone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', e => {
+            dropzone.classList.remove('dragover');
+        });
+
+        // Drop event
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            file = e.dataTransfer.files[0];
+            showPreview(file);
+        });
+
+        // Show image preview
+        function showPreview(file) {
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                dropText.style.display = 'none';
+                predictBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Predict click
+        //predictBtn.addEventListener('click', () => {
+        function sendPrediction(file) {
+            if (!file) return;
+            let formData = new FormData();
+            formData.append("file", file);
+
+            predictBtn.disabled = true;
+            predictBtn.innerText = "Predicting...";
+
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(async res => {
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch {
+                    throw new Error("Invalid JSON response: " + text);
+            }   
+        })
+            .then(data => {
+                predictBtn.disabled = false;
+                predictBtn.innerText = "Predict";
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<span style="color:red">${data.error}</span>`;
+                } else {
+                    if (data.species === "unknown" || data.sex === "unknown") {
+                    // Show only "unknown" values
+                        resultDiv.innerHTML = `
+                        <b>Species and Sex: "unknown"</b> 
+                        
+                    `;
+                    } else {
+                    // Show top prediction
+                    resultDiv.innerHTML = `
+                        <b>Species:</b> ${data.species} (${data.species_confidence}%)<br>
+                        <b>Sex:</b> ${data.sex} (${data.sex_confidence}%)
+                    `;
+                    // Optional: show full confidence breakdown
+                    let breakdownHTML = "<br><b>All species probabilities:</b><br>";
+                    for (const [k,v] of Object.entries(data.species_all)){
+                        breakdownHTML += `${k}: ${v}%<br>`;
+                    }
+                    breakdownHTML += "<br><b>All sex probabilities:</b><br>";
+                    for (const [k,v] of Object.entries(data.sex_all)){
+                        breakdownHTML += `${k}: ${v}%<br>`;
+                    }
+                    let breakdownHTML1 = "<br><b>All species probabilities:</b>";
+                    breakdownHTML1 += '<div class="probability-grid">';
+                    for (const [k, v] of Object.entries(data.species_all)) {
+                        breakdownHTML1 += `<div class="probability-item">${k}: <b>${v}%</b></div>`;
+}
+                    breakdownHTML1 += "</div>";
+
+                    breakdownHTML1 += "<br><b>All sex probabilities:</b>";
+                    breakdownHTML1 += '<div class="probability-grid">';
+                    for (const [k, v] of Object.entries(data.sex_all)) {
+                        breakdownHTML1 += `<div class="probability-item">${k}: <b>${v}%</b></div>`;
+}
+                    breakdownHTML1 += "</div>";
+
+                    let breakdownHTML2 = "<br><b>All species probabilities:</b><br>";
+                    for (const [k, v] of Object.entries(data.species_all)) {
+                        breakdownHTML2 += `
+        ${k}:
+        <div class="confidence-bar">
+            <div class="confidence-fill" style="width:${v}%;background:${getBarColor(v)}">
+                ${v}%
+            </div>
+        </div>
+    `;
+}
+                    breakdownHTML2 += "<br><b>All sex probabilities:</b><br>";
+                    for (const [k, v] of Object.entries(data.sex_all)) {
+                        breakdownHTML2 += `
+        ${k}:
+        <div class="confidence-bar">
+            <div class="confidence-fill" style="width:${v}%;background:${getBarColor(v)}">
+                ${v}%
+            </div>
+        </div>
+    `;
+}
+
+                    resultDiv.innerHTML += breakdownHTML;
+                    resultDiv.innerHTML += breakdownHTML1;
+                    resultDiv.innerHTML += breakdownHTML2;
+                }}
+                
+                if (data.gradcam_url) {
+                    resultDiv.innerHTML += `<br><img src="${data.gradcam_url}" width="300">`;
+                }
+                resultDiv.style.display = 'block';
+            })
+            .catch(err => {
+                predictBtn.disabled = false;
+                predictBtn.innerText = "Predict";
+                resultDiv.innerHTML = `<span style="color:red">Error: ${err}</span>`;
+                resultDiv.style.display = 'block';
+            });
+        };
+        
+
+        // Auto-predict when file is selected
+    fileInput.addEventListener('change', e => {
+        file = e.target.files[0];
+        showPreview(file);
+        sendPrediction(file);  // auto-predict
+    });
+
+// Auto-predict when file is dropped
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        file = e.dataTransfer.files[0];
+        showPreview(file);
+        sendPrediction(file);  // auto-predict
+    });
+// Keep Predict button for manual trigger
+predictBtn.addEventListener('click', () => {
+    sendPrediction(file);
+});
+//code
+function getBarColor(value) {
+    if (value >= 80) return "#4caf50"; // green
+    if (value >= 50) return "#ff9800"; // orange
+    return "#f44336"; // red
+}
+
+    </script>
+</body>
+</html>

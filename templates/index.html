@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tick Species & Sex Classifier</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Layout wrapper -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Sidebar -->
+    <nav class="bg-white shadow-md flex md:flex-col items-center justify-between md:justify-start
+                w-full md:w-20 h-14 md:h-screen py-2 md:py-6 space-y-0 md:space-y-8
+                fixed bottom-0 md:static md:rounded-r-xl z-50">
+      <!-- Logo -->
+       <!--<h1 class="hidden md:block text-2xl">🐞</h1>-->
+
+      <!-- Buttons -->
+      <div class="flex flex-row md:flex-col space-x-6 md:space-x-0 md:space-y-6">
+        <!-- Classifier -->
+        <button onclick="showSection('classifier')" class="nav-btn text-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16V4a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h10z" />
+          </svg>
+        </button>
+
+        <!-- Predictions -->
+        <button onclick="showSection('predictions')" class="nav-btn text-gray-600 hover:text-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6h2v6H9zm4 0v-4h2v4h-2zM5 21h14a2 2 0 002-2V7a2 2 0 00-2-2h-4l-2-3H9L7 5H3a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
+
+        <!-- Dashboard -->
+        <button onclick="showSection('dashboard')" class="nav-btn text-green-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6" />
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-6 md:ml-20 overflow-y-auto h-[calc(100vh-2.5rem)] md:h-screen">
+      <!-- Classifier Section -->
+      <div id="classifier" class="section w-full bg-white shadow-lg rounded-2xl p-4 md:p-6">
+        <h2 class="text-lg font-semibold mb-4">Tick Species & Sex Classifier</h2>
+        <div class="flex flex-col lg:flex-row gap-6 w-full h-full">
+          <!-- Dropzone -->
+          <div class="flex-1 flex flex-col items-center">
+            <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 md:p-8 text-center cursor-pointer hover:border-blue-400 transition w-full flex flex-col justify-center">
+              <p id="dropText" class="text-sm md:text-base">Drag & Drop an image here or <strong>click</strong> to choose a file</p>
+              <input type="file" id="fileInput" accept="image/*" hidden>
+              <img id="previewImg" class="mx-auto rounded-xl shadow-sm hidden mt-4 w-full max-w-sm md:max-w-md lg:max-w-lg" alt="Preview Image">
+            </div>
+            <button id="predictBtn" disabled class="mt-4 px-4 md:px-6 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 disabled:bg-gray-300 transition w-full sm:w-auto">
+              Predict
+            </button>
+          </div>
+
+          <!-- Results -->
+          <div id="result" class="flex-1 hidden text-sm space-y-4 bg-white p-4 rounded-xl shadow overflow-y-auto">
+            <!-- JS injects results -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Predictions Section -->
+      <div id="predictions" class="section hidden w-full bg-white shadow-lg rounded-2xl p-4 md:p-6">
+        <h2 class="text-lg font-semibold mb-4">Saved Predictions</h2>
+        <div id="predictionsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <!-- JS injects predictions -->
+        </div>
+      </div>
+<!-- Dashboard Section -->
+<div id="dashboard" class="section hidden w-full bg-white shadow-lg rounded-2xl p-6">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 text-center">
+        <div class="bg-green-100 rounded-xl p-4 shadow">
+            <h3 class="font-semibold text-gray-700">Total Predictions</h3>
+            <p id="kpi-total" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-blue-100 rounded-xl p-4 shadow">
+            <h3 class="font-semibold text-gray-700">Most Common Species</h3>
+            <p id="kpi-species" class="text-2xl font-bold text-gray-900">-</p>
+        </div>
+        <div class="bg-yellow-100 rounded-xl p-4 shadow">
+            <h3 class="font-semibold text-gray-700">Average Confidence</h3>
+            <p id="kpi-confidence" class="text-2xl font-bold text-gray-900">0%</p>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-4 shadow">
+            <h3 class="font-semibold mb-4 text-gray-700">Species Distribution</h3>
+            <canvas id="speciesChart" width="400" height="300"></canvas>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow">
+            <h3 class="font-semibold mb-4 text-gray-700">Average Species Confidence</h3>
+            <canvas id="speciesConfChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Optional: Filters -->
+    <div class="mt-6 flex flex-wrap gap-4 items-center">
+        <div>
+            <label class="font-medium text-gray-700">Filter by Species:</label>
+            <select id="filterSpecies" class="border rounded px-2 py-1">
+                <option value="">All</option>
+                <!-- JS will populate -->
+            </select>
+        </div>
+        <div>
+            <label class="font-medium text-gray-700">Confidence Threshold:</label>
+            <input type="range" id="filterConfidence" min="0" max="100" value="0" class="w-48">
+            <span id="filterConfidenceVal">0%</span>
+        </div>
+    </div>
+
+</div>
+
+
+  <!-- Footer -->
+  <footer class="hidden md:block w-full text-center text-gray-500 text-sm py-2 bg-gray-50 md:ml-20">
+    &copy; 2025 Tick Classifier. All rights reserved.
+  </footer>
+
+  <!-- External JS -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
