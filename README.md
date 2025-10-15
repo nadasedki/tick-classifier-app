@@ -1,74 +1,104 @@
-# 🕷️ Tick Classifier
+# 🕷️ Tick Classifier — Automatic Classification of *Hyalomma* Ticks
 
-A deep learning model that classifies tick species from images using Convolutional Neural Networks (CNNs).  
-This project aims to support research and diagnostics by automating tick identification through image recognition.
+## 📘 Project Description
 
----
-
-## 🚀 Features
-- 🧠 CNN-based image classification using TensorFlow / Keras  
-- 📊 Data preprocessing and augmentation pipeline  
-- 🔍 Visualization of training results (accuracy, loss curves)  
-- 🧩 Transfer learning option (ResNet, MobileNet)  
-- 💾 Model saving and prediction interface  
+This project aims to **develop an automatic system for classifying ticks of the *Hyalomma* genus** from digital images.
+The main objective is to **predict both the species and sex** of each tick — two key parameters in **entomological** and **epidemiological** studies.
 
 ---
 
-## 🧰 Tech Stack
-- Python 3.x  
-- TensorFlow / Keras  
-- NumPy, Pandas  
-- Matplotlib, Seaborn  
-- Scikit-learn  
+## 🧠 Objectives and Contributions
+
+This work follows an integrated scientific and technical approach, bringing several key contributions:
+
+* 🧬 **Implementation of deep convolutional neural networks (ResNet18 and ResNet50)** using **transfer learning**, achieving high performance even with a limited number of images.
+* ⚙️ **Multitask architecture with dual outputs**, allowing **simultaneous prediction** of both species and sex.
+* 🧩 **Data augmentation** techniques to address dataset imbalance and improve model robustness.
+* 🔁 **End-to-end pipeline** covering data preprocessing, model training, evaluation, and prediction.
+* 🌐 **Interactive web application (Flask)** connected to a **MongoDB** database for storing and viewing predictions.
+* 📊 **Analytical dashboard** for visualizing model performance and interpreting results.
 
 ---
 
-## 📁 Project Structure
-tick-classifier/
-├── data/ # training and test datasets
-├── models/ # saved CNN models (.h5)
-├── notebooks/ # Jupyter notebooks for training & evaluation
-├── src/ # scripts (data prep, model, utils)
-├── requirements.txt # dependencies
-└── README.md
+## 🧪 Experimental Results
 
-yaml
-Copier le code
+The experiments demonstrated strong performance:
+
+* **Species classification accuracy:** 96%
+* **Sex classification accuracy:** 98%
+
+These results confirm the **feasibility and effectiveness** of the proposed approach in an operational context.
 
 ---
 
-## ⚙️ Installation
+## 🧰 Technologies Used
+
+| Technology                  | Purpose                                              |
+| --------------------------- | ---------------------------------------------------- |
+| 🧠 **ResNet18 / ResNet50**  | CNN architectures with transfer learning             |
+| 🌐 **Flask**                | Lightweight Python framework for the web application |
+| 🗄️ **MongoDB**             | NoSQL database for storing predictions and metadata  |
+| 🐍 **Python**               | Core language for pipeline and backend development   |
+| 📈 **Matplotlib / Seaborn** | Data visualization and performance analysis          |
+
+---
+
+## 🚀 Key Features
+
+* Upload tick images for automatic classification.
+* Simultaneous **species and sex prediction**.
+* Results stored and tracked via **MongoDB**.
+* Simple and intuitive **web interface**.
+* Analytical **dashboard** for model performance monitoring.
+
+---
+
+## 🧭 Project Structure
+
+```
+tick_app/
+│
+├── app.py                 # Main entry point — launches the Flask web application
+│
+├── model/                 # Contains model files and definitions
+│   ├── best_model3.pth    # Trained ResNet model (tracked via Git LFS)
+│   └── resnet_model.py    # Model architecture and loading logic
+│
+├── static/                # Frontend assets (CSS, JS, images)
+│
+├── templates/             # HTML templates rendered with Jinja2
+│
+├── routes/                # Flask route definitions (API endpoints, UI routes, etc.)
+│
+├── utils/                 # Utility and helper functions (data preprocessing, prediction, etc.)
+│
+├── services/              # Business logic or service layer (e.g., database handling, analytics)
+│
+├── ven/                   # Virtual environment (usually not included in Git)
+│
+├── README.md              # Project documentation
+│
+└── requirements.txt       # List of Python dependencies
+
+```
+
+---
+
+## 📦 Installation
+
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/tick-classifier.git
+git clone https://github.com/<your_username>/tick-classifier.git
 cd tick-classifier
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-
-# Install dependencies
 pip install -r requirements.txt
-🧪 Training the Model
-bash
-Copier le code
-python src/train.py
-🔍 Inference Example
-bash
-Copier le code
-python src/predict.py --image path/to/tick_image.jpg
-📊 Results
-Model	Accuracy	Loss
-CNN (Custom)	92.5%	0.18
-Transfer Learning (ResNet50)	96.3%	0.09
+```
 
+---
 
-### 4️⃣ **Commit Commands**
+## ▶️ Run the App
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit: Tick Classifier using CNN for tick species detection"
-git branch -M main
-git remote add origin https://github.com/yourusername/tick-classifier.git
-git push -u origin main
+python app.py
+```
+
+Then open your browser and go to **[http://127.0.0.1:5000/](http://127.0.0.1:5000/)**
+
